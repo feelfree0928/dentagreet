@@ -285,7 +285,7 @@ export default function SessionDetailPage() {
                       }`}
                     >
                       <p className="text-xs font-semibold mb-1 opacity-60">
-                        {entry.role === 'replica' ? 'Mia (Receptionist)' : 'Patient'}
+                        {entry.role === 'replica' ? 'Maya (Receptionist)' : 'Patient'}
                       </p>
                       {entry.text}
                     </div>

@@ -216,7 +216,7 @@ export function HairCheck({ patientName, onStart, onError }: HairCheckProps) {
       </button>
 
       <p className="mt-4 text-slate-500 text-xs text-center max-w-xs">
-        By clicking Start, you agree to allow this session to be recorded for quality and training purposes (Mia will confirm your consent).
+        By clicking Start, you agree to allow this session to be recorded for quality and training purposes (Maya will confirm your consent).
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 # DentaGreet — AI Dental Reception System
 
-> **Investor-demo prototype.** An AI-powered reception system for dental clinics. A patient enters their name, joins a video call with a lifelike AI receptionist (Mia, powered by Tavus CVI), gives or denies consent, answers intake questions, and ends the session. Everything is recorded, transcribed live, and structured intake data is displayed in real time.
+> **Investor-demo prototype.** An AI-powered reception system for dental clinics. A patient enters their name, joins a video call with a lifelike AI receptionist (Maya, powered by Tavus CVI), gives or denies consent, answers intake questions, and ends the session. Everything is recorded, transcribed live, and structured intake data is displayed in real time.
 
 ---
 
@@ -70,7 +70,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 npx ts-node --project tsconfig.scripts.json scripts/create-persona.ts
 ```
 
-This creates "Mia — Dental Reception Assistant" with the correct system prompt and tool definitions. Copy the printed `TAVUS_PERSONA_ID=...` line into your `.env.local`.
+This creates "Maya — Dental Reception Assistant" with the correct system prompt and tool definitions. Copy the printed `TAVUS_PERSONA_ID=...` line into your `.env.local`.
 
 ### 5. Run Locally
 
@@ -98,10 +98,10 @@ Follow this script for a live demo:
 3. Click **Start Reception**
 
 ### Step 3 — The Call (main demo)
-1. Mia (the AI receptionist) appears and greets Jane by name
-2. Mia explains the recording/data-use policy and asks for consent
+1. Maya (the AI receptionist) appears and greets Jane by name
+2. Maya explains the recording/data-use policy and asks for consent
 3. **Consent granted path:** Say "Yes" — the consent badge in the right panel turns green ✓
-4. Mia asks 5 intake questions one at a time:
+4. Maya asks 5 intake questions one at a time:
    - Reason for visit → panel updates with highlight animation
    - Symptoms → panel updates
    - Duration → panel updates
@@ -109,7 +109,7 @@ Follow this script for a live demo:
    - Additional notes → panel updates
 5. Live transcript scrolls at the bottom showing both speakers
 6. Red **● REC** indicator is visible throughout
-7. Mia summarizes and says goodbye → session ends automatically
+7. Maya summarizes and says goodbye → session ends automatically
 
 ### Step 4 — End Screen
 - "Thank you, Jane! The dental team will review your information before your visit."
@@ -126,7 +126,7 @@ Follow this script for a live demo:
 
 ### Consent Denied Path (optional demo)
 - At the consent question, say "No" or "I don't consent"
-- Mia thanks Jane and advises contacting the dental team directly
+- Maya thanks Jane and advises contacting the dental team directly
 - Session ends with `status=declined`, no intake fields captured
 - Admin shows the declined session
 
@@ -234,7 +234,7 @@ supabase/migrations/
 | Camera/mic denied | Allow permissions in browser settings; refresh |
 | Supabase insert error | Run the SQL migration; check `SUPABASE_SERVICE_ROLE_KEY` |
 | No recording in admin | Recording uploads after session ends — wait for "Uploading session…" to complete |
-| Mia doesn't greet by name | Check `TAVUS_PERSONA_ID` — re-run `scripts/create-persona.ts` if needed |
+| Maya doesn't greet by name | Check `TAVUS_PERSONA_ID` — re-run `scripts/create-persona.ts` if needed |
 | Admin login fails | Check `ADMIN_PASSWORD` in `.env.local` |
 | Build error | Run `npx tsc --noEmit` to see TypeScript errors |
 

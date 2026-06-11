@@ -73,7 +73,7 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
     const { replicaTracks, localTracks } = callState;
 
     if (replicaVideoRef.current && (replicaTracks.videoTrack || replicaTracks.audioTrack)) {
-      // Include BOTH tracks so the (unmuted) replica element plays Mia's voice.
+      // Include BOTH tracks so the (unmuted) replica element plays Maya's voice.
       // Audio often arrives in a separate track-started event after video, so
       // this effect re-runs and re-attaches once the audio track is present.
       const tracks: MediaStreamTrack[] = [];
@@ -352,7 +352,7 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                <p className="text-slate-300 text-sm">Connecting to Mia…</p>
+                <p className="text-slate-300 text-sm">Connecting to Maya…</p>
               </div>
             )}
 

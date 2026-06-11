@@ -76,7 +76,7 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-teal-50 text-sm leading-relaxed">
-                Our AI receptionist, Mia, will greet you, collect some information about your visit, and prepare the dental team before you arrive.
+                Our AI receptionist, Maya, will greet you, collect some information about your visit, and prepare the dental team before you arrive.
               </p>
             </div>
 
@@ -115,7 +115,7 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
                   </svg>
                   <p className="text-xs text-amber-800 leading-relaxed">
-                    <strong>Camera & microphone required.</strong> Your browser will ask for permission when you join. Please allow both to speak with Mia.
+                    <strong>Camera & microphone required.</strong> Your browser will ask for permission when you join. Please allow both to speak with Maya.
                   </p>
                 </div>
 
@@ -145,7 +145,7 @@ export default function HomePage() {
 
               {/* Privacy note */}
               <p className="mt-5 text-xs text-slate-400 text-center leading-relaxed">
-                Mia will explain how your data is used and ask for your consent before collecting any information.
+                Maya will explain how your data is used and ask for your consent before collecting any information.
               </p>
             </div>
           </div>

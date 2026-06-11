@@ -31,7 +31,7 @@ export function TranscriptStrip({ entries }: TranscriptStripProps) {
           <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
           <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
-        <span className="text-slate-400 text-sm italic">Waiting for Mia to speak…</span>
+        <span className="text-slate-400 text-sm italic">Waiting for Maya to speak…</span>
       </div>
     );
   }
