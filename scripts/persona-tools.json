@@ -1,0 +1,65 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "record_patient_info",
+      "description": "Record a single piece of patient intake information the moment the patient provides it, so it appears on the patient's verification panel in real time. Call this again with the same field to overwrite a corrected value.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "reason_for_visit",
+              "symptom_description",
+              "symptom_location",
+              "pain_level",
+              "symptom_duration",
+              "symptom_triggers",
+              "relevant_history",
+              "medications_allergies",
+              "additional_notes",
+              "urgent_flag"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The information in concise plain language, faithful to what the patient said."
+          }
+        },
+        "required": ["field", "value"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "record_consent",
+      "description": "Record the patient's consent decision immediately after they respond to the consent question. Must be called exactly once per session before any intake questions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["granted", "declined"] }
+        },
+        "required": ["status"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "end_session",
+      "description": "Signal that the session is over so the application can stop recording and close the call. Call this only after you have spoken your closing words.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["completed", "consent_declined", "emergency_escalation", "minor_no_guardian", "terminated_by_assistant"]
+          }
+        },
+        "required": ["reason"]
+      }
+    }
+  }
+]
