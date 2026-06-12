@@ -10,6 +10,8 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const firstName = name.trim().split(/\s+/)[0];
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = name.trim();
@@ -87,6 +89,12 @@ export default function HomePage() {
                   <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1.5">
                     Your full name
                   </label>
+                  <p
+                    key={firstName || 'Kirat'}
+                    className="greeting-animate mb-2 text-2xl font-extrabold tracking-tight"
+                  >
+                    Welcome, {firstName || 'Kirat'}!
+                  </p>
                   <input
                     ref={inputRef}
                     id="name"

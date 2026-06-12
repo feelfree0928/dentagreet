@@ -68,6 +68,26 @@ video {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
+/* Animated greeting on the landing page */
+@keyframes greetingPop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.92); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes greetingShimmer {
+  to { background-position: 200% center; }
+}
+
+.greeting-animate {
+  background: linear-gradient(90deg, #0d9488, #2dd4bf, #14b8a6, #0d9488);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: greetingPop 0.5s ease-out forwards, greetingShimmer 3s linear infinite;
+}
+
 /* Pulse for loading states */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
