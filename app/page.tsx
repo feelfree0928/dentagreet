@@ -90,10 +90,10 @@ export default function HomePage() {
                     Your full name
                   </label>
                   <p
-                    key={firstName || 'Kirat'}
+                    key={firstName || 'Edward'}
                     className="greeting-animate mb-2 text-2xl font-extrabold tracking-tight"
                   >
-                    Welcome, {firstName || 'Kirat'}!
+                    Welcome, {firstName || 'Edward'}!
                   </p>
                   <input
                     ref={inputRef}
