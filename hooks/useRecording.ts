@@ -64,17 +64,46 @@ export function useRecording(sessionId: string) {
       const blob = await recorder.stop();
       recorderRef.current = null;
 
+      if (!blob || blob.size === 0) {
+        throw new Error('Recording is empty');
+      }
+
       setStatus('uploading');
 
-      const res = await fetch(`/api/sessions/${sessionId}/recording`, {
+      // 1. Ask the server for a signed upload URL. This lets us upload the
+      //    video bytes DIRECTLY to Supabase Storage, bypassing Vercel's
+      //    4.5MB serverless request-body limit (a Route Handler POST of the
+      //    blob fails with 413 for any recording longer than ~20s).
+      const signRes = await fetch(`/api/sessions/${sessionId}/recording/sign`, {
         method: 'POST',
-        headers: { 'Content-Type': blob.type || 'video/webm' },
-        body: blob,
       });
+      if (!signRes.ok) {
+        const data = await signRes.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Could not get upload URL');
+      }
+      const { path, token } = (await signRes.json()) as { path: string; token: string };
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? 'Upload failed');
+      // 2. Upload straight to Supabase Storage using the signed token.
+      const { getBrowserSupabaseClient } = await import('@/lib/supabase-browser');
+      const supabase = getBrowserSupabaseClient();
+      const { error: uploadError } = await supabase.storage
+        .from('recordings')
+        .uploadToSignedUrl(path, token, blob, {
+          contentType: blob.type || 'video/webm',
+        });
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
+
+      // 3. Confirm the path so the server records sessions.recording_path.
+      const confirmRes = await fetch(`/api/sessions/${sessionId}/recording`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      if (!confirmRes.ok) {
+        const data = await confirmRes.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Could not save recording path');
       }
 
       setStatus('done');
