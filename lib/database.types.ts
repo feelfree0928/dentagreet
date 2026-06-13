@@ -26,6 +26,31 @@ export interface IntakeData {
   urgent_flag?: string;
 }
 
+export interface SoapNote {
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  generated_at: string; // ISO timestamp, stamped by the server
+  model: string; // Claude model id used
+}
+
+export interface ConsentLanguageEvidence {
+  role: 'replica' | 'user';
+  quote: string;
+}
+
+export interface ConsentLanguage {
+  patient_language: string; // language the patient first spoke
+  consent_delivered_language: string; // language Maya used for the consent disclosure
+  matched: boolean; // was consent delivered in the patient's language?
+  consent_outcome: 'granted' | 'declined' | 'unknown';
+  explanation: string;
+  evidence: ConsentLanguageEvidence[];
+  generated_at: string; // ISO timestamp, stamped by the server
+  model: string;
+}
+
 export interface Session {
   id: string;
   patient_name: string;
@@ -46,6 +71,9 @@ export interface Session {
   intake: IntakeData;
   transcript: TranscriptEntry[];
   recording_path: string | null;
+  recording_segments: string[];
+  soap_note: SoapNote | null;
+  consent_language: ConsentLanguage | null;
   started_at: string;
   ended_at: string | null;
 }

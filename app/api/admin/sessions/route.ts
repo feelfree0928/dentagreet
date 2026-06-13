@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest) {
   const { data, error } = await supabase
     .from('sessions')
     .select(
-      'id, patient_name, status, consent, reason_for_visit, started_at, ended_at, recording_path'
+      'id, patient_name, status, consent, reason_for_visit, started_at, ended_at, recording_path, recording_segments'
     )
     .order('started_at', { ascending: false });
 

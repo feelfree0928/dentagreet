@@ -71,6 +71,23 @@ export function snakeToTitle(str: string): string {
     .join(' ');
 }
 
+/**
+ * Storage object name for a single recording segment, e.g. "0007.webm".
+ * Zero-padded so segments sort lexically in upload order.
+ */
+export function recordingSegmentName(index: number): string {
+  return `${String(index).padStart(4, '0')}.webm`;
+}
+
+/**
+ * Full Supabase Storage path for a recording segment, e.g.
+ * "recordings/<sessionId>/0007.webm". Used by the sign/confirm routes and the
+ * admin playback route so the naming scheme stays in one place.
+ */
+export function recordingSegmentPath(sessionId: string, index: number): string {
+  return `recordings/${sessionId}/${recordingSegmentName(index)}`;
+}
+
 /** Check if MediaRecorder supports a given MIME type, with fallback */
 export function getSupportedMimeType(): string {
   const types = [

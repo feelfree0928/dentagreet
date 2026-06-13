@@ -50,6 +50,7 @@ TAVUS_PERSONA_ID=                 # Output of step 4 below
 NEXT_PUBLIC_SUPABASE_URL=         # From Supabase project → Settings → API
 NEXT_PUBLIC_SUPABASE_ANON_KEY=    # From Supabase project → Settings → API
 SUPABASE_SERVICE_ROLE_KEY=        # From Supabase project → Settings → API (SERVER ONLY)
+ANTHROPIC_API_KEY=                # From console.anthropic.com → API Keys (SERVER ONLY — admin SOAP note)
 ADMIN_PASSWORD=                   # Any password for the /admin route
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```

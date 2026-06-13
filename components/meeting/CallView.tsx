@@ -195,6 +195,10 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
               [field]: value,
               intake: { ...intake.toIntakeObject(), [field]: value },
             });
+          } else {
+            // Maya called record_patient_info with a field name we don't know —
+            // surface it instead of silently leaving the panel blank.
+            console.warn('[CallView] record_patient_info: unrecognized field', args.field, value);
           }
         }
 
@@ -236,32 +240,32 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
   // ── Render: Session ended screen ───────────────────────────────────────────
   if (sessionEnded) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-6">
+      <div className="min-h-screen mesh-dark flex items-center justify-center px-4">
+        <div className="max-w-md w-full glass rounded-3xl p-8 text-center space-y-6 animate-reveal">
           {endReason === 'declined' ? (
             <>
-              <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 ring-1 ring-amber-400/30 flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                 </svg>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white mb-2">No problem, {patientName}</h1>
-                <p className="text-slate-300 leading-relaxed">
+                <p className="text-slate-300 leading-relaxed text-sm">
                   Please contact the dental team directly to arrange your visit. You can call us or speak with the front desk.
                 </p>
               </div>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-16 h-16 rounded-2xl bg-teal-500/15 ring-1 ring-teal-400/30 flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white mb-2">Thank you, {patientName}!</h1>
-                <p className="text-slate-300 leading-relaxed">
+                <p className="text-slate-300 leading-relaxed text-sm">
                   The dental team will review your information before your visit. See you soon!
                 </p>
               </div>
@@ -280,7 +284,7 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
 
           <button
             onClick={() => router.push('/')}
-            className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-8 py-3 rounded-xl transition-all"
+            className="btn btn-primary w-full"
           >
             Return Home
           </button>
@@ -292,14 +296,19 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
   // ── Render: Ending in progress ─────────────────────────────────────────────
   if (isEndingSession) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen mesh-dark flex items-center justify-center">
         <div className="text-center space-y-4">
-          <svg className="w-10 h-10 animate-spin text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-slate-300 text-lg font-medium">Uploading session…</p>
-          <p className="text-slate-500 text-sm">Please keep this tab open</p>
+          <div className="relative mx-auto w-14 h-14">
+            <span className="absolute inset-0 rounded-2xl bg-teal-500/30 blur-xl animate-pulse-slow" />
+            <div className="relative w-14 h-14 rounded-2xl glass flex items-center justify-center">
+              <svg className="w-7 h-7 animate-spin text-teal-300" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-white text-lg font-semibold">Uploading session…</p>
+          <p className="text-slate-400 text-sm">Please keep this tab open</p>
         </div>
       </div>
     );
@@ -307,36 +316,36 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
 
   // ── Render: Main call UI ───────────────────────────────────────────────────
   return (
-    <div className="h-screen flex flex-col bg-slate-900 overflow-hidden">
+    <div className="h-screen flex flex-col mesh-dark overflow-hidden">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-800 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-teal-600 flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="flex items-center justify-between px-4 sm:px-5 py-2.5 glass border-b border-white/10 flex-shrink-0 z-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-teal-400 flex items-center justify-center shadow-[0_6px_16px_-6px_rgba(13,148,136,0.7)]">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <span className="text-white font-semibold text-sm">DentaGreet</span>
+          <span className="text-white font-bold text-sm tracking-tight">DentaGreet</span>
         </div>
 
         {/* REC indicator */}
         {recording.status === 'recording' && (
-          <div className="flex items-center gap-1.5 bg-red-900/50 border border-red-700/50 px-3 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-red-500 rec-dot" />
-            <span className="text-red-300 text-xs font-semibold tracking-wide">REC</span>
+          <div className="flex items-center gap-1.5 bg-rose-500/15 ring-1 ring-rose-400/40 px-3 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-rose-500 rec-dot" />
+            <span className="text-rose-200 text-xs font-bold tracking-wider">REC</span>
           </div>
         )}
 
         {/* Connection status */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 bg-white/5 ring-1 ring-white/10 px-3 py-1 rounded-full">
           <span
             className={`w-2 h-2 rounded-full ${
-              callState.stage === 'connected' ? 'bg-green-400' :
+              callState.stage === 'connected' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' :
               callState.stage === 'joining' ? 'bg-amber-400 animate-pulse' :
               'bg-slate-500'
             }`}
           />
-          <span className="text-slate-400 text-xs capitalize">{callState.stage}</span>
+          <span className="text-slate-300 text-xs font-medium capitalize">{callState.stage}</span>
         </div>
       </div>
 
@@ -345,23 +354,30 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
         {/* Left 75%: Video area */}
         <div className="flex-1 flex flex-col relative" style={{ width: '75%' }}>
           {/* Replica video */}
-          <div className="flex-1 relative bg-slate-800 overflow-hidden">
+          <div className="flex-1 relative bg-slate-950 overflow-hidden">
             {callState.stage === 'joining' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-                <svg className="w-10 h-10 animate-spin text-teal-400" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                <p className="text-slate-300 text-sm">Connecting to Maya…</p>
+                <div className="relative w-14 h-14">
+                  <span className="absolute inset-0 rounded-2xl bg-teal-500/30 blur-xl animate-pulse-slow" />
+                  <div className="relative w-14 h-14 rounded-2xl glass flex items-center justify-center">
+                    <svg className="w-7 h-7 animate-spin text-teal-300" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm font-medium">Connecting to Maya…</p>
               </div>
             )}
 
             {callState.stage === 'error' && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-                <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
-                <p className="text-red-300 font-medium">Connection error</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-rose-500/15 ring-1 ring-rose-400/30 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <p className="text-white font-semibold">Connection error</p>
                 <p className="text-slate-400 text-sm">{callState.error}</p>
               </div>
             )}
@@ -374,8 +390,11 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
               className="w-full h-full object-cover"
             />
 
+            {/* Subtle vignette for depth */}
+            <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_140px_40px_rgba(2,6,23,0.55)]" />
+
             {/* Patient PiP — bottom-right of video area */}
-            <div className="absolute bottom-4 right-4 w-40 h-24 rounded-xl overflow-hidden border-2 border-white/20 shadow-xl bg-slate-700">
+            <div className="absolute bottom-4 right-4 w-44 h-28 rounded-2xl overflow-hidden ring-1 ring-white/20 shadow-2xl bg-slate-800">
               <video
                 ref={patientVideoRef}
                 autoPlay
@@ -383,6 +402,7 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
                 playsInline
                 className="w-full h-full object-cover scale-x-[-1]"
               />
+              <span className="absolute bottom-1.5 left-2 text-[10px] font-semibold text-white/80 drop-shadow">You</span>
               {!callState.localTracks.videoTrack && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -394,7 +414,7 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
           </div>
 
           {/* Transcript strip */}
-          <div className="bg-slate-900/95 border-t border-slate-700 min-h-[72px] max-h-[100px] overflow-hidden">
+          <div className="glass border-t border-white/10 min-h-[72px] max-h-[100px] overflow-hidden">
             <TranscriptStrip entries={transcript.entries} />
           </div>
 

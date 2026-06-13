@@ -1,8 +1,10 @@
 /**
  * GET /api/admin/sessions/[id]/recording-url
  *
- * Generates a short-lived signed URL for the session recording.
- * Requires admin_session cookie.
+ * Generates short-lived signed URLs for the session recording segments (in
+ * order), so the admin client can download and concatenate them into one
+ * continuous video. Falls back to a single legacy recording_path file.
+ * Returns { urls: string[] }. Requires admin_session cookie.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -24,10 +26,10 @@ export async function GET(
   const { id } = await params;
   const supabase = createServerSupabaseClient();
 
-  // Fetch recording_path from session
+  // Fetch both the segmented recording and the legacy single-file path.
   const { data: session, error: fetchError } = await supabase
     .from('sessions')
-    .select('recording_path')
+    .select('recording_path, recording_segments')
     .eq('id', id)
     .single();
 
@@ -35,19 +37,33 @@ export async function GET(
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
-  if (!session.recording_path) {
-    return NextResponse.json({ url: null, message: 'No recording available' });
+  // Prefer the segmented recording; fall back to the legacy single file.
+  const segments = Array.isArray(session.recording_segments)
+    ? (session.recording_segments as string[])
+    : [];
+  const paths = segments.length > 0
+    ? segments
+    : session.recording_path
+      ? [session.recording_path]
+      : [];
+
+  if (paths.length === 0) {
+    return NextResponse.json({ urls: [], url: null, message: 'No recording available' });
   }
 
-  // Generate a signed URL valid for 1 hour
-  const { data: signedData, error: signError } = await supabase.storage
-    .from('recordings')
-    .createSignedUrl(session.recording_path, 3600);
+  // Sign each segment path (valid for 1 hour), preserving order.
+  const urls: string[] = [];
+  for (const path of paths) {
+    const { data: signedData, error: signError } = await supabase.storage
+      .from('recordings')
+      .createSignedUrl(path, 3600);
 
-  if (signError || !signedData?.signedUrl) {
-    console.error('[recording-url] Signed URL error:', signError);
-    return NextResponse.json({ error: 'Could not generate signed URL' }, { status: 500 });
+    if (signError || !signedData?.signedUrl) {
+      console.error('[recording-url] Signed URL error:', signError);
+      return NextResponse.json({ error: 'Could not generate signed URL' }, { status: 500 });
+    }
+    urls.push(signedData.signedUrl);
   }
 
-  return NextResponse.json({ url: signedData.signedUrl });
+  return NextResponse.json({ urls });
 }

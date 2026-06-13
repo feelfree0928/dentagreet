@@ -48,6 +48,13 @@ const personaPayload = {
     'You are operating as a reception assistant at a dental clinic. You are speaking with a patient who has arrived for their appointment or is checking in remotely.',
   layers: {
     llm: {
+      // Strong tool-calling model. The starter model `tavus-gpt-oss` does not
+      // reliably emit conversation.tool_call events for this multi-step intake,
+      // so Maya never invokes record_patient_info / record_consent / end_session
+      // (symptom: blank live intake panel while the transcript still works).
+      // Alternatives: tavus-gpt-4.1, tavus-gpt-4o-mini, tavus-gpt-5.2,
+      // tavus-claude-haiku-4.5.
+      model: 'tavus-gpt-4o',
       tools: TOOLS,
     },
     tts: {

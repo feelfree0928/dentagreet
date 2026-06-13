@@ -7,9 +7,10 @@
  *
  * Usage:
  *   const recorder = new CompositeRecorder(replicaVideoEl, patientVideoEl);
+ *   recorder.onSegment = (blob, index) => upload(blob, index);
  *   await recorder.start();
- *   // ... call happens ...
- *   const blob = await recorder.stop();
+ *   // ... call happens; a segment is emitted every SEGMENT_MS ...
+ *   await recorder.stop(); // flushes the final partial segment
  */
 
 import { getSupportedMimeType } from './utils';
@@ -17,6 +18,11 @@ import { getSupportedMimeType } from './utils';
 const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 720;
 const FRAME_RATE = 24;
+
+// How often MediaRecorder emits a segment. With a timeslice, ondataavailable
+// fires every SEGMENT_MS with that window's bytes, so we can upload the
+// recording incrementally instead of all at once when the call ends.
+const SEGMENT_MS = 10_000;
 
 // PiP dimensions (bottom-right of the left 75% area)
 const PIP_WIDTH = 240;
@@ -29,7 +35,16 @@ export class CompositeRecorder {
   private ctx: CanvasRenderingContext2D;
   private mediaRecorder: MediaRecorder | null = null;
   private chunks: Blob[] = [];
+  private segmentIndex = 0;
   private animFrameId: number | null = null;
+
+  /**
+   * Called once per emitted segment. Set this before start() to stream the
+   * recording out incrementally. Only segment 0 carries the WebM header;
+   * segments must be concatenated in order to reassemble a playable file.
+   */
+  onSegment: ((blob: Blob, index: number) => void) | null = null;
+
   private audioCtx: AudioContext | null = null;
   private audioDestination: MediaStreamAudioDestinationNode | null = null;
   private startTime: Date | null = null;
@@ -68,6 +83,7 @@ export class CompositeRecorder {
 
   async start(): Promise<void> {
     this.chunks = [];
+    this.segmentIndex = 0;
     this.startTime = new Date();
 
     // ── Audio mixing ──────────────────────────────────────────────────────────
@@ -105,12 +121,18 @@ export class CompositeRecorder {
     });
 
     this.mediaRecorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) {
+      if (!e.data || e.data.size === 0) return;
+      const index = this.segmentIndex++;
+      if (this.onSegment) {
+        // Stream each segment out immediately; don't buffer the whole file.
+        this.onSegment(e.data, index);
+      } else {
+        // Fallback: no consumer — buffer for the combined blob from stop().
         this.chunks.push(e.data);
       }
     };
 
-    this.mediaRecorder.start(1000); // collect chunks every 1s
+    this.mediaRecorder.start(SEGMENT_MS); // emit a segment every SEGMENT_MS
 
     // ── Draw loop ─────────────────────────────────────────────────────────────
     this.drawFrame();

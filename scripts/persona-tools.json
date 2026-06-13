@@ -27,7 +27,8 @@
             "description": "The information in concise plain language, faithful to what the patient said."
           }
         },
-        "required": ["field", "value"]
+        "required": ["field", "value"],
+        "additionalProperties": false
       }
     }
   },
@@ -41,7 +42,8 @@
         "properties": {
           "status": { "type": "string", "enum": ["granted", "declined"] }
         },
-        "required": ["status"]
+        "required": ["status"],
+        "additionalProperties": false
       }
     }
   },
@@ -58,7 +60,8 @@
             "enum": ["completed", "consent_declined", "emergency_escalation", "minor_no_guardian", "terminated_by_assistant"]
           }
         },
-        "required": ["reason"]
+        "required": ["reason"],
+        "additionalProperties": false
       }
     }
   }

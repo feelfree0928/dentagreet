@@ -55,13 +55,18 @@ export default function MeetingPage() {
   // ── Loading ────────────────────────────────────────────────────────────────
   if (stage === 'loading') {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <svg className="w-10 h-10 animate-spin text-teal-400 mx-auto" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-slate-400">Preparing your session…</p>
+      <div className="min-h-screen mesh-dark flex items-center justify-center">
+        <div className="text-center space-y-5">
+          <div className="relative mx-auto w-14 h-14">
+            <span className="absolute inset-0 rounded-2xl bg-teal-500/30 blur-xl animate-pulse-slow" />
+            <div className="relative w-14 h-14 rounded-2xl glass flex items-center justify-center">
+              <svg className="w-7 h-7 animate-spin text-teal-300" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-slate-300 font-medium">Preparing your session…</p>
         </div>
       </div>
     );
@@ -70,10 +75,10 @@ export default function MeetingPage() {
   // ── Error ──────────────────────────────────────────────────────────────────
   if (stage === 'error') {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full text-center space-y-5">
-          <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center mx-auto">
-            <svg className="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <div className="min-h-screen mesh-dark flex items-center justify-center px-4">
+        <div className="max-w-md w-full glass rounded-3xl p-8 text-center space-y-5 animate-reveal">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/15 ring-1 ring-rose-400/30 flex items-center justify-center mx-auto">
+            <svg className="w-8 h-8 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
@@ -83,7 +88,7 @@ export default function MeetingPage() {
           </div>
           <button
             onClick={() => router.push('/')}
-            className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-8 py-3 rounded-xl transition-all"
+            className="btn btn-primary w-full"
           >
             Return Home
           </button>

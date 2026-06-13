@@ -9,6 +9,7 @@
     "create-persona": "ts-node --project tsconfig.scripts.json scripts/create-persona.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@daily-co/daily-js": "^0.91.0",
     "@supabase/supabase-js": "^2.108.1",
     "clsx": "^2.1.1",
