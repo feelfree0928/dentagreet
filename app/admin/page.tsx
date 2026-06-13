@@ -90,7 +90,7 @@ export default function AdminPage() {
         return;
       }
       const data = await res.json();
-      setSessions(data);
+      setSessions(Array.isArray(data) ? data : []);
       setIsAuthenticated(true);
     } catch {
       // ignore

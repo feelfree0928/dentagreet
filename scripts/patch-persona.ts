@@ -62,9 +62,17 @@ const TOOLS = JSON.parse(
 // tavus-gpt-4o-mini, tavus-gpt-5.2, tavus-claude-haiku-4.5.
 const LLM_MODEL = 'tavus-gpt-4o';
 
+// `speculative_inference: false` — with it ON (the Tavus default) the model infers
+// on partial speech and inference IDs churn, which interferes with reliable
+// tool-call emission in the real-time pipeline. OFF = the model waits for the full
+// utterance, giving deterministic record_patient_info / record_consent calls.
 const patchOps = [
   { op: 'replace', path: '/system_prompt', value: SYSTEM_PROMPT },
-  { op: 'add', path: '/layers/llm', value: { model: LLM_MODEL, tools: TOOLS } },
+  {
+    op: 'add',
+    path: '/layers/llm',
+    value: { model: LLM_MODEL, tools: TOOLS, speculative_inference: false },
+  },
 ];
 
 async function getPersona() {
@@ -86,11 +94,16 @@ function llmModel(persona: unknown): string {
   return (persona as any)?.layers?.llm?.model ?? '(default — NOT tool-capable)';
 }
 
+function specInference(persona: unknown): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return String((persona as any)?.layers?.llm?.speculative_inference);
+}
+
 async function patchPersona() {
   console.log(`🔧 Patching persona ${TAVUS_PERSONA_ID} …\n`);
 
   const before = await getPersona();
-  console.log('Before — LLM model:', llmModel(before));
+  console.log('Before — LLM model:', llmModel(before), '· speculative_inference:', specInference(before));
   console.log('Before — registered tools:', toolNames(before).join(', ') || '(none)');
 
   const res = await fetch(`https://tavusapi.com/v2/personas/${TAVUS_PERSONA_ID}`, {
@@ -112,7 +125,7 @@ async function patchPersona() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const after: any = await getPersona();
   const names = toolNames(after);
-  console.log('After  — LLM model:', llmModel(after));
+  console.log('After  — LLM model:', llmModel(after), '· speculative_inference:', specInference(after));
   console.log('After  — registered tools:', names.join(', ') || '(none)');
 
   const expected = ['record_patient_info', 'record_consent', 'end_session'];

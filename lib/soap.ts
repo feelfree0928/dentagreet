@@ -14,6 +14,11 @@ import type { Session, SoapNote, ConsentLanguage } from './database.types';
 
 export const SOAP_MODEL = 'claude-opus-4-8';
 
+/** Whether the Anthropic API key is configured (required for SOAP generation). */
+export function soapConfigured(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY);
+}
+
 // SOAP fields and consent fields WITHOUT the server-stamped generated_at/model.
 type SoapCore = Pick<SoapNote, 'subjective' | 'objective' | 'assessment' | 'plan'>;
 type ConsentCore = Omit<ConsentLanguage, 'generated_at' | 'model'>;

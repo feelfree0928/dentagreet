@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { generateSoapAnalysis, SOAP_MODEL } from '@/lib/soap';
+import { generateSoapAnalysis, soapConfigured, SOAP_MODEL } from '@/lib/soap';
 import type { Session, SoapNote, ConsentLanguage } from '@/lib/database.types';
 
 async function isAdminAuthenticated(): Promise<boolean> {
@@ -73,6 +73,10 @@ export async function GET(
     });
   }
 
+  if (!soapConfigured()) {
+    return NextResponse.json({ soap_note: null, consent_language: null, reason: 'not_configured' });
+  }
+
   if (!hasTranscript(session)) {
     return NextResponse.json({ soap_note: null, consent_language: null, reason: 'no_transcript' });
   }
@@ -101,6 +105,10 @@ export async function POST(
   const session = await loadSession(id);
   if (!session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+  }
+
+  if (!soapConfigured()) {
+    return NextResponse.json({ soap_note: null, consent_language: null, reason: 'not_configured' });
   }
 
   if (!hasTranscript(session)) {

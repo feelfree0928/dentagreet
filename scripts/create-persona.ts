@@ -55,6 +55,9 @@ const personaPayload = {
       // Alternatives: tavus-gpt-4.1, tavus-gpt-4o-mini, tavus-gpt-5.2,
       // tavus-claude-haiku-4.5.
       model: 'tavus-gpt-4o',
+      // OFF so the model waits for the full utterance before inferring — required
+      // for deterministic tool-call emission (record_patient_info / record_consent).
+      speculative_inference: false,
       tools: TOOLS,
     },
     tts: {

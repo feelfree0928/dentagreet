@@ -148,70 +148,89 @@ export function CallView({ sessionId, conversationUrl, patientName }: CallViewPr
     [recording, leave, sessionId]
   );
 
-  // ── App-message event handler ──────────────────────────────────────────────
+  // Keep the latest handler dependencies in a ref so the app-message subscription
+  // is created exactly ONCE and never churns. (Previously this effect depended on
+  // `intake`/`transcript`, which are new objects every render, so it re-subscribed
+  // constantly — wasteful and a risk to event delivery.)
+  const handlerDepsRef = useRef({ transcript, intake, persistSession, endSession });
+  useEffect(() => {
+    handlerDepsRef.current = { transcript, intake, persistSession, endSession };
+  });
+
+  // ── App-message event handler (subscribed once) ────────────────────────────
   useEffect(() => {
     const unsubscribe = onAppMessage((rawData) => {
-      const event = normalizeTavusAppMessage(rawData);
-      if (!event) {
-        // Surface conversation events we failed to parse so schema drift is
-        // visible instead of silently dropped.
-        const d = rawData as { message_type?: string; event_type?: string } | null;
-        if (d && (d.message_type === 'conversation' || d.event_type?.startsWith('conversation.'))) {
-          console.warn('[CallView] Unhandled Tavus conversation event:', d.event_type, rawData);
+      // A throw on one event (e.g. a malformed payload) must never kill the
+      // stream or drop unrelated events.
+      try {
+        const event = normalizeTavusAppMessage(rawData);
+        if (!event) {
+          // Surface conversation events we failed to parse so schema drift is
+          // visible instead of silently dropped.
+          const d = rawData as { message_type?: string; event_type?: string } | null;
+          if (d && (d.message_type === 'conversation' || d.event_type?.startsWith('conversation.'))) {
+            console.warn('[CallView] Unhandled Tavus conversation event:', d.event_type, rawData);
+          }
+          return;
         }
-        return;
-      }
 
-      if (event.type === 'utterance') {
-        const entry = { role: event.role, text: event.text, ts: event.ts };
-        transcript.addEntry(entry);
-        // Persist using the ref (kept current by addEntry) — avoids a stale
-        // closure over transcript.entries.
-        persistSession({ transcript: [...transcript.entriesRef.current, entry] });
-      }
+        const { transcript, intake, persistSession, endSession } = handlerDepsRef.current;
 
-      if (event.type === 'tool_call') {
-        const { tool, args } = event;
+        if (event.type === 'utterance') {
+          const entry = { role: event.role, text: event.text, ts: event.ts };
+          transcript.addEntry(entry);
+          // Persist using the ref (kept current by addEntry) — avoids a stale
+          // closure over transcript.entries.
+          persistSession({ transcript: [...transcript.entriesRef.current, entry] });
+        }
 
-        if (tool === TAVUS_TOOLS.RECORD_CONSENT) {
-          const granted = args.status === 'granted';
-          intake.updateConsent(granted);
-          persistSession({ consent: granted, status: granted ? 'in_progress' : 'declined' });
+        if (event.type === 'tool_call') {
+          const { tool, args } = event;
+          // Make tool-call delivery observable at the wire level.
+          console.log('[CallView] tool_call', tool, args);
 
-          if (!granted) {
-            // Consent denied — end session after a short delay (let AI finish speaking)
-            setTimeout(() => endSession('declined'), 3000);
+          if (tool === TAVUS_TOOLS.RECORD_CONSENT) {
+            const granted = args.status === 'granted';
+            intake.updateConsent(granted);
+            persistSession({ consent: granted, status: granted ? 'in_progress' : 'declined' });
+
+            if (!granted) {
+              // Consent denied — end session after a short delay (let AI finish speaking)
+              setTimeout(() => endSession('declined'), 3000);
+            }
+          }
+
+          if (tool === TAVUS_TOOLS.RECORD_PATIENT_INFO) {
+            const field = args.field as IntakeField;
+            const value = String(args.value ?? '');
+            if (INTAKE_FIELDS.includes(field)) {
+              intake.updateField(field, value);
+
+              // Persist individual column + intake object
+              persistSession({
+                [field]: value,
+                intake: { ...intake.toIntakeObject(), [field]: value },
+              });
+            } else {
+              // Maya called record_patient_info with a field name we don't know —
+              // surface it instead of silently leaving the panel blank.
+              console.warn('[CallView] record_patient_info: unrecognized field', args.field, value);
+            }
+          }
+
+          if (tool === TAVUS_TOOLS.END_SESSION) {
+            // Map the spec's end reason onto our local end state.
+            const reason = args.reason === 'consent_declined' ? 'declined' : 'granted';
+            setTimeout(() => endSession(reason), 1500);
           }
         }
-
-        if (tool === TAVUS_TOOLS.RECORD_PATIENT_INFO) {
-          const field = args.field as IntakeField;
-          const value = String(args.value ?? '');
-          if (INTAKE_FIELDS.includes(field)) {
-            intake.updateField(field, value);
-
-            // Persist individual column + intake object
-            persistSession({
-              [field]: value,
-              intake: { ...intake.toIntakeObject(), [field]: value },
-            });
-          } else {
-            // Maya called record_patient_info with a field name we don't know —
-            // surface it instead of silently leaving the panel blank.
-            console.warn('[CallView] record_patient_info: unrecognized field', args.field, value);
-          }
-        }
-
-        if (tool === TAVUS_TOOLS.END_SESSION) {
-          // Map the spec's end reason onto our local end state.
-          const reason = args.reason === 'consent_declined' ? 'declined' : 'granted';
-          setTimeout(() => endSession(reason), 1500);
-        }
+      } catch (err) {
+        console.error('[CallView] Error handling app-message:', err, rawData);
       }
     });
 
     return unsubscribe;
-  }, [onAppMessage, transcript, intake, persistSession, endSession]);
+  }, [onAppMessage]);
 
   // ── Handle replica leaving (Tavus ends conversation) ──────────────────────
   useEffect(() => {

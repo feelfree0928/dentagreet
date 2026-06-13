@@ -132,9 +132,18 @@ export function normalizeTavusAppMessage(
     const rawArgs =
       p.arguments ?? data.tool_arguments ?? data.arguments ?? fn?.arguments ?? {};
 
-    // Parse args if they arrive as a JSON string
-    const parsedArgs: Record<string, unknown> =
-      typeof rawArgs === 'string' ? JSON.parse(rawArgs) : (rawArgs as Record<string, unknown>);
+    // Parse args if they arrive as a JSON string. Never throw out of here — a
+    // malformed payload must not kill the event (or the handler) entirely.
+    let parsedArgs: Record<string, unknown> = {};
+    if (typeof rawArgs === 'string') {
+      try {
+        parsedArgs = JSON.parse(rawArgs) as Record<string, unknown>;
+      } catch {
+        console.warn('[tavus-events] tool_call arguments were not valid JSON:', rawArgs);
+      }
+    } else if (rawArgs && typeof rawArgs === 'object') {
+      parsedArgs = rawArgs as Record<string, unknown>;
+    }
 
     if (!toolName) return null;
     return {
